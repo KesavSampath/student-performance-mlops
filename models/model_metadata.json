@@ -1,0 +1,26 @@
+{
+  "model_name": "LinearRegression",
+  "model_version": "1.0.0",
+  "mlflow_run_id": "dd2b256c0fcb4daeabc731942cde4209",
+  "random_seed": 42,
+  "test_size": 0.2,
+  "features": [
+    "study_hours",
+    "attendance_percentage",
+    "previous_exam_score",
+    "assignment_completion_percentage",
+    "sleep_hours",
+    "extracurricular_hours"
+  ],
+  "target": "final_exam_score",
+  "metrics": {
+    "mae": 4.2109,
+    "rmse": 5.316,
+    "r2": 0.7917
+  },
+  "quality_gate": {
+    "min_r2": 0.75,
+    "max_mae": 8.0,
+    "passed": true
+  }
+}

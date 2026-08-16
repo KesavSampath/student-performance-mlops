@@ -1,0 +1,56 @@
+# dvc.yaml
+# =========
+# DVC Pipeline for Student Performance MLOps
+#
+# Stages (run in order):
+#   1. generate   → create synthetic dataset
+#   2. validate   → Pandera schema validation
+#   3. train      → train models, log to MLflow, save best model
+#
+# Usage:
+#   dvc repro              # run full pipeline (only re-runs changed stages)
+#   dvc repro generate     # run only the generate stage
+#   dvc dag                # view pipeline DAG
+#
+# Why DVC?
+#   - Tracks the dataset like Git tracks code
+#   - Pipelines are reproducible: same code + same params → same output
+#   - Enables dataset versioning without storing large files in Git
+
+stages:
+
+  # ── Stage 1: Generate dataset ──────────────────────────────────────────────
+  generate:
+    cmd: python src/generate_data.py --output data/raw/students.csv
+    deps:
+      - src/generate_data.py
+    params:
+      - params.yaml:
+          - generate.n_students
+          - generate.random_seed
+    outs:
+      - data/raw/students.csv
+
+  # ── Stage 2: Validate dataset ──────────────────────────────────────────────
+  validate:
+    cmd: python src/data_validation.py
+    deps:
+      - src/data_validation.py
+      - data/raw/students.csv
+
+  # ── Stage 3: Train models ──────────────────────────────────────────────────
+  train:
+    cmd: python src/train.py --data data/raw/students.csv
+    deps:
+      - src/train.py
+      - src/preprocess.py
+      - src/evaluate.py
+      - data/raw/students.csv
+    params:
+      - params.yaml:
+          - train.random_seed
+          - train.test_size
+    outs:
+      - models/best_model.joblib
+      - models/preprocessor.joblib
+      - models/model_metadata.json

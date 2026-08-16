@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  generate:
+    cmd: python src/generate_data.py --output data/raw/students.csv
+    deps:
+    - path: src/generate_data.py
+      hash: md5
+      md5: 924249f8b0b6735262f93ca383da3eeb
+      size: 3901
+    params:
+      params.yaml:
+        generate.n_students: 1000
+        generate.random_seed: 42
+    outs:
+    - path: data/raw/students.csv
+      hash: md5
+      md5: 207661e3de6d176890854c075d446508
+      size: 39395
