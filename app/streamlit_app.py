@@ -4,10 +4,9 @@ streamlit_app.py
 Streamlit frontend for Student Performance Prediction.
 
 Architecture:
-  Streamlit → FastAPI → Saved ML Model
+  Streamlit -> FastAPI -> Saved ML Model
 
-This app does NOT load the ML model directly.
-All predictions are obtained by calling the FastAPI backend via HTTP.
+This application communicates exclusively via HTTP with the FastAPI backend.
 """
 
 import os
@@ -20,67 +19,82 @@ import streamlit as st
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-# Reads from environment variable so Docker Compose can set it to
-# http://backend:8000 while local dev defaults to http://localhost:8000
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
-PAGE_TITLE = "Student Performance Predictor"
+PAGE_TITLE = "Student Performance Prediction System"
 
 st.set_page_config(
     page_title=PAGE_TITLE,
-    page_icon="🎓",
     layout="centered",
     initial_sidebar_state="expanded",
 )
 
 # ---------------------------------------------------------------------------
-# CSS styling
+# Professional Enterprise CSS styling (Clean, non-AI aesthetic)
 # ---------------------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Main background */
-    .stApp {
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-        color: #e0e0e0;
+    /* Global layout & typography */
+    body, .stApp {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Card */
+    /* Result Card */
     .result-card {
-        background: rgba(255,255,255,0.08);
-        border-radius: 16px;
-        padding: 24px 32px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 24px;
         margin: 16px 0;
-        border: 1px solid rgba(255,255,255,0.15);
-        backdrop-filter: blur(8px);
+        text-align: center;
     }
 
-    /* Score display */
+    /* Score value */
     .score-value {
-        font-size: 72px;
-        font-weight: 800;
-        text-align: center;
-        background: linear-gradient(135deg, #f6d365, #fda085);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 56px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.1;
+        margin-bottom: 8px;
     }
 
     /* Performance badge */
-    .badge-excellent { color: #00e676; font-weight: 700; font-size: 24px; text-align: center; }
-    .badge-verygood  { color: #40c4ff; font-weight: 700; font-size: 24px; text-align: center; }
-    .badge-good      { color: #b2ff59; font-weight: 700; font-size: 24px; text-align: center; }
-    .badge-average   { color: #ffab40; font-weight: 700; font-size: 24px; text-align: center; }
-    .badge-poor      { color: #ff5252; font-weight: 700; font-size: 24px; text-align: center; }
+    .badge {
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+    .badge-excellent { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-verygood  { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+    .badge-good      { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+    .badge-average   { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .badge-poor      { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: rgba(0,0,0,0.4);
+    /* Metadata text */
+    .meta-text {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 8px;
     }
 
-    /* Headers */
-    h1, h2, h3 { color: #fff !important; }
+    /* Category band boxes */
+    .band-box {
+        border-radius: 6px;
+        padding: 10px 6px;
+        text-align: center;
+        font-size: 13px;
+    }
 
-    /* Footer metadata */
-    .meta-text { color: #aaa; font-size: 13px; }
+    /* Clean divider */
+    hr {
+        margin: 20px 0;
+        border: none;
+        border-top: 1px solid #e2e8f0;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -118,103 +132,133 @@ def api_predict(features: dict) -> dict:
         return {"error": str(e)}
 
 
-# ---------------------------------------------------------------------------
-# Badge helper
-# ---------------------------------------------------------------------------
-def performance_badge(perf: str) -> str:
-    cls = {
+def get_badge_html(perf: str) -> str:
+    cls_map = {
         "EXCELLENT": "badge-excellent",
         "VERY GOOD": "badge-verygood",
         "GOOD": "badge-good",
         "AVERAGE": "badge-average",
         "POOR": "badge-poor",
-    }.get(perf, "badge-average")
-    return f'<div class="{cls}">{perf}</div>'
+    }
+    css_class = cls_map.get(perf, "badge-average")
+    return f'<div class="badge {css_class}">{perf}</div>'
 
 
 # ---------------------------------------------------------------------------
-# Sidebar — model info
+# Sidebar — Model information
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("## 🎓 Model Information")
+    st.markdown("### System Status")
 
     backend_ok = api_health()
     if backend_ok:
-        st.success("✅ API Backend: Online")
+        st.success("API Backend: Operational")
         info = api_model_info()
         if "error" not in info:
-            st.markdown(f"**Model:** `{info.get('model_name', '—')}`")
-            st.markdown(f"**Version:** `{info.get('model_version', '—')}`")
-            st.markdown(f"**Type:** `{info.get('model_type', '—')}`")
+            st.markdown("---")
+            st.markdown("### Active Model")
+            st.write(f"**Architecture:** {info.get('model_name', 'N/A')}")
+            st.write(f"**Version:** {info.get('model_version', 'N/A')}")
+            st.write(f"**Type:** {info.get('model_type', 'regression')}")
+            
             m = info.get("training_metrics", {})
             if m:
                 st.markdown("---")
-                st.markdown("**Training Metrics**")
+                st.markdown("### Evaluation Metrics")
                 col1, col2 = st.columns(2)
-                col1.metric("R²", f"{m.get('r2', 0):.3f}")
+                col1.metric("R-Squared", f"{m.get('r2', 0):.3f}")
                 col2.metric("MAE", f"{m.get('mae', 0):.2f}")
                 col1.metric("RMSE", f"{m.get('rmse', 0):.2f}")
     else:
-        st.error("❌ API Backend: Offline")
-        st.warning("Start FastAPI:\n```\nuvicorn api.main:app\n```")
+        st.error("API Backend: Offline")
+        st.caption("Backend server is not responding at " + API_BASE_URL)
 
     st.markdown("---")
-    st.markdown("**IT4V43 — MLOps Project**")
-    st.markdown("*Student Performance Prediction*")
-    st.markdown("[GitHub Actions CI/CD]() | [MLflow Tracking](http://localhost:5000)")
+    st.markdown("### Project Metadata")
+    st.write("**Course:** IT4V43 - Machine Learning Operations")
+    st.write("**Tracking:** MLflow Tracking Server")
+    st.write("**Pipeline:** DVC & Pandera Validation")
 
 
 # ---------------------------------------------------------------------------
-# Main content
+# Main Application Content
 # ---------------------------------------------------------------------------
-st.markdown("# 🎓 Student Performance Predictor")
+st.title("Student Performance Prediction System")
 st.markdown(
-    "Enter a student's academic profile below to predict their final exam score. "
-    "Predictions are served by a **FastAPI** backend connected to a trained **Scikit-learn** model."
+    "Academic performance evaluation system. Enter student metrics to estimate the expected "
+    "final examination score using the verified regression pipeline."
 )
 
 st.markdown("---")
 
-# ── Input form ──────────────────────────────────────────────────────────────
-with st.form("prediction_form"):
-    st.markdown("### 📋 Student Profile")
+# ---------------------------------------------------------------------------
+# Input Form
+# ---------------------------------------------------------------------------
+with st.form("student_profile_form"):
+    st.subheader("Student Metrics Input")
 
     col1, col2 = st.columns(2)
     with col1:
         study_hours = st.slider(
-            "📚 Study Hours (per day)", min_value=0.0, max_value=14.0, value=5.0, step=0.5,
-            help="Average daily hours spent studying"
+            "Study Hours (daily)",
+            min_value=0.0,
+            max_value=14.0,
+            value=5.0,
+            step=0.5,
+            help="Average hours spent studying per day",
         )
         previous_exam_score = st.slider(
-            "📝 Previous Exam Score", min_value=0.0, max_value=100.0, value=65.0, step=1.0,
-            help="Score on the most recent exam"
+            "Previous Examination Score",
+            min_value=0.0,
+            max_value=100.0,
+            value=65.0,
+            step=1.0,
+            help="Score achieved in the preceding examination period",
         )
         sleep_hours = st.slider(
-            "😴 Sleep Hours (per night)", min_value=3.0, max_value=12.0, value=7.0, step=0.5,
-            help="Average nightly sleep duration"
+            "Sleep Duration (hours/night)",
+            min_value=3.0,
+            max_value=12.0,
+            value=7.0,
+            step=0.5,
+            help="Average nightly sleep duration",
         )
 
     with col2:
         attendance_percentage = st.slider(
-            "🏫 Attendance (%)", min_value=0.0, max_value=100.0, value=80.0, step=1.0,
-            help="Percentage of classes attended"
+            "Attendance Rate (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=80.0,
+            step=1.0,
+            help="Cumulative classroom attendance percentage",
         )
         assignment_completion_percentage = st.slider(
-            "✅ Assignment Completion (%)", min_value=0.0, max_value=100.0, value=80.0, step=1.0,
-            help="Percentage of assignments completed"
+            "Assignment Completion Rate (%)",
+            min_value=0.0,
+            max_value=100.0,
+            value=80.0,
+            step=1.0,
+            help="Percentage of submitted coursework and assignments",
         )
         extracurricular_hours = st.slider(
-            "⚽ Extracurricular Hours (per day)", min_value=0.0, max_value=10.0, value=2.0, step=0.5,
-            help="Daily hours in extracurricular activities"
+            "Extracurricular Activity (daily hours)",
+            min_value=0.0,
+            max_value=10.0,
+            value=2.0,
+            step=0.5,
+            help="Time allocated to extracurricular and sports activities",
         )
 
-    submitted = st.form_submit_button("🚀 Predict Final Score", use_container_width=True)
+    submitted = st.form_submit_button("Compute Prediction", use_container_width=True)
 
 
-# ── Prediction result ───────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# Prediction Output
+# ---------------------------------------------------------------------------
 if submitted:
     if not backend_ok:
-        st.error("Cannot make predictions — API backend is offline. Start FastAPI first.")
+        st.error("Prediction request failed: API backend service is currently offline.")
     else:
         features = {
             "study_hours": study_hours,
@@ -225,77 +269,92 @@ if submitted:
             "extracurricular_hours": extracurricular_hours,
         }
 
-        with st.spinner("Calling FastAPI backend ..."):
+        with st.spinner("Processing inference request via REST API..."):
             result = api_predict(features)
 
         if "error" in result:
-            st.error(f"Prediction failed: {result['error']}")
+            st.error(f"Inference error: {result['error']}")
         else:
             score = result["predicted_score"]
             perf = result["performance"]
             ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             st.markdown("---")
-            st.markdown("### 📊 Prediction Result")
+            st.subheader("Prediction Analysis")
+
+            model_name = info.get("model_name", "LinearRegression") if backend_ok else "Model"
+            model_ver = info.get("model_version", "1.0.0") if backend_ok else "1.0.0"
 
             st.markdown(
                 f"""
                 <div class="result-card">
-                    <div class="score-value">{score}</div>
-                    {performance_badge(perf)}
-                    <br/>
-                    <p class="meta-text" style="text-align:center">
-                        Predicted at {ts}<br/>
-                        Model: {info.get('model_name', '—')} v{info.get('model_version', '—')}
-                    </p>
+                    <div class="score-value">{score:.1f} / 100</div>
+                    {get_badge_html(perf)}
+                    <div class="meta-text">
+                        Evaluated on {ts} | Model: {model_name} (v{model_ver})
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-            # Performance guide
-            st.markdown("---")
-            st.markdown("### 🏆 Performance Categories")
+            # Performance Classification Breakdown
+            st.markdown("#### Performance Classification Scale")
             cats = [
-                ("🔴 POOR", "0–39", "#ff5252"),
-                ("🟠 AVERAGE", "40–59", "#ffab40"),
-                ("🟡 GOOD", "60–74", "#b2ff59"),
-                ("🔵 VERY GOOD", "75–89", "#40c4ff"),
-                ("🟢 EXCELLENT", "90–100", "#00e676"),
+                ("POOR", "0.0 - 39.9", "#fee2e2", "#991b1b"),
+                ("AVERAGE", "40.0 - 59.9", "#ffedd5", "#9a3412"),
+                ("GOOD", "60.0 - 74.9", "#fef9c3", "#854d0e"),
+                ("VERY GOOD", "75.0 - 89.9", "#e0f2fe", "#075985"),
+                ("EXCELLENT", "90.0 - 100.0", "#dcfce7", "#166534"),
             ]
             cols = st.columns(5)
-            for i, (label, rng, color) in enumerate(cats):
+            for i, (label, rng, bg, text_color) in enumerate(cats):
                 with cols[i]:
                     active = (
-                        (score < 40 and "POOR" in label)
-                        or (40 <= score < 60 and "AVERAGE" in label)
-                        or (60 <= score < 75 and "GOOD" in label and "VERY" not in label)
-                        or (75 <= score < 90 and "VERY GOOD" in label)
-                        or (score >= 90 and "EXCELLENT" in label)
+                        (score < 40 and label == "POOR")
+                        or (40 <= score < 60 and label == "AVERAGE")
+                        or (60 <= score < 75 and label == "GOOD")
+                        or (75 <= score < 90 and label == "VERY GOOD")
+                        or (score >= 90 and label == "EXCELLENT")
                     )
-                    border = f"3px solid {color}" if active else "1px solid #444"
+                    border = f"2px solid {text_color}" if active else "1px solid #cbd5e1"
+                    font_weight = "700" if active else "500"
                     st.markdown(
-                        f'<div style="border:{border};border-radius:8px;padding:8px;text-align:center;">'
-                        f'<b>{label}</b><br/><small>{rng}</small></div>',
+                        f"""
+                        <div class="band-box" style="background:{bg}; color:{text_color}; border:{border}; font-weight:{font_weight};">
+                            <div>{label}</div>
+                            <div style="font-size:11px; opacity:0.85; margin-top:2px;">{rng}</div>
+                        </div>
+                        """,
                         unsafe_allow_html=True,
                     )
 
-            # Feature summary
+            # Feature Importance Attribution
             st.markdown("---")
-            st.markdown("### 🔍 Feature Explanation (SHAP Ranking)")
-            st.info(
-                "Based on SHAP analysis of the trained model, the most influential features are:\n\n"
-                "1. **previous_exam_score** — strongest predictor (past performance predicts future)\n"
-                "2. **study_hours** — more study time → higher score\n"
-                "3. **attendance_percentage** — consistent attendance boosts learning\n"
-                "4. **assignment_completion_percentage** — completing work reinforces knowledge\n"
-                "5. **sleep_hours** — adequate sleep improves retention\n"
-                "6. **extracurricular_hours** — small negative effect when excessive\n\n"
-                "*Individual SHAP plots are available in the `models/` directory after training.*"
+            st.subheader("Feature Contribution Summary (SHAP)")
+            st.markdown(
+                """
+                Global feature importance computed via Shapley Additive Explanations:
+                - **Previous Exam Score**: Primary baseline predictor for expected performance.
+                - **Study Hours**: Strongest positive controllable factor influencing score.
+                - **Attendance Percentage**: Significant correlation with concept retention.
+                - **Assignment Completion**: Regular coursework submission provides positive reinforcement.
+                - **Sleep Duration**: Adequate rest supports cognitive retention.
+                - **Extracurricular Hours**: Moderate engagement is neutral; excessive hours show slight negative trade-off.
+                """
             )
 
-            # Input summary table
+            # Input Parameters Table
             st.markdown("---")
-            st.markdown("### 📌 Input Summary")
-            input_df = pd.DataFrame([features]).T.rename(columns={0: "Value"})
-            st.dataframe(input_df, use_container_width=True)
+            st.subheader("Submitted Input Parameters")
+            input_df = pd.DataFrame(
+                [
+                    {"Feature": "Study Hours (daily)", "Value": f"{study_hours:.1f} hours"},
+                    {"Feature": "Attendance Rate", "Value": f"{attendance_percentage:.0f}%"},
+                    {"Feature": "Previous Exam Score", "Value": f"{previous_exam_score:.0f} / 100"},
+                    {"Feature": "Assignment Completion Rate", "Value": f"{assignment_completion_percentage:.0f}%"},
+                    {"Feature": "Sleep Duration", "Value": f"{sleep_hours:.1f} hours"},
+                    {"Feature": "Extracurricular Activity", "Value": f"{extracurricular_hours:.1f} hours"},
+                ]
+            )
+            st.dataframe(input_df, use_container_width=True, hide_index=True)
