@@ -1,7 +1,7 @@
 {
   "model_name": "LinearRegression",
   "model_version": "1.0.0",
-  "mlflow_run_id": "dd2b256c0fcb4daeabc731942cde4209",
+  "mlflow_run_id": "36893cf6b7994af4bdff05cf5998560f",
   "random_seed": 42,
   "test_size": 0.2,
   "features": [
