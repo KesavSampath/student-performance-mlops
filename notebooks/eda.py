@@ -52,7 +52,7 @@ plt.tight_layout()
 path = os.path.join(REPORTS_DIR, "feature_distributions.png")
 plt.savefig(path, dpi=100)
 plt.close(fig)
-print(f"[EDA] Saved → {path}")
+print(f"[EDA] Saved -> {path}")
 
 # ── 2. Target distribution ────────────────────────────────────────────────────
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -67,7 +67,7 @@ fig.tight_layout()
 path = os.path.join(REPORTS_DIR, "target_distribution.png")
 plt.savefig(path, dpi=100)
 plt.close(fig)
-print(f"[EDA] Saved → {path}")
+print(f"[EDA] Saved -> {path}")
 
 # ── 3. Correlation matrix ──────────────────────────────────────────────────────
 fig, ax = plt.subplots(figsize=(9, 7))
@@ -82,7 +82,7 @@ fig.tight_layout()
 path = os.path.join(REPORTS_DIR, "correlation_matrix.png")
 plt.savefig(path, dpi=100)
 plt.close(fig)
-print(f"[EDA] Saved → {path}")
+print(f"[EDA] Saved -> {path}")
 
 # ── 4. Study hours vs Final score ──────────────────────────────────────────────
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
@@ -105,7 +105,7 @@ fig.tight_layout()
 path = os.path.join(REPORTS_DIR, "feature_vs_target.png")
 plt.savefig(path, dpi=100)
 plt.close(fig)
-print(f"[EDA] Saved → {path}")
+print(f"[EDA] Saved -> {path}")
 
 # ── 5. Pairplot (key features only) ───────────────────────────────────────────
 key_cols = ["study_hours", "previous_exam_score", "attendance_percentage", "final_exam_score"]
@@ -115,6 +115,6 @@ plt.suptitle("Scatter Matrix — Key Features", fontsize=12)
 path = os.path.join(REPORTS_DIR, "scatter_matrix.png")
 plt.savefig(path, dpi=100)
 plt.close("all")
-print(f"[EDA] Saved → {path}")
+print(f"[EDA] Saved -> {path}")
 
-print("\n[EDA] ✓ All EDA plots saved to reports/")
+print("\n[EDA] PASSED: All EDA plots saved to reports/")

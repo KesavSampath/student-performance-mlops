@@ -32,14 +32,12 @@ Usage:
 
 import json
 import os
-import sys
-from typing import Dict, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
 import joblib
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.preprocess import FEATURES, load_preprocessor
 
 # ---------------------------------------------------------------------------
@@ -101,7 +99,7 @@ def _load_artifacts():
 # ---------------------------------------------------------------------------
 # Public prediction function
 # ---------------------------------------------------------------------------
-def predict_score(features: Union[Dict, pd.DataFrame]) -> Dict:
+def predict_score(features: Union[dict, pd.DataFrame]) -> dict:
     """
     Predict the final exam score for a student.
 
@@ -145,7 +143,7 @@ def predict_score(features: Union[Dict, pd.DataFrame]) -> Dict:
     }
 
 
-def get_metadata() -> Dict:
+def get_metadata() -> dict:
     """Return model metadata (name, version, metrics, etc.)."""
     _, _, metadata = _load_artifacts()
     return metadata or {}

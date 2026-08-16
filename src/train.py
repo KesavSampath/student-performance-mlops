@@ -43,7 +43,7 @@ from sklearn.ensemble import RandomForestRegressor
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.data_validation import validate_dataset
 from src.preprocess import (
-    FEATURES, TARGET, RANDOM_SEED, TEST_SIZE,
+    FEATURES, RANDOM_SEED, TEST_SIZE,
     build_pipeline, split_data, save_preprocessor
 )
 from src.evaluate import compute_metrics, quality_gate

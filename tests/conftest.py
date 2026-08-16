@@ -14,8 +14,6 @@ import pytest
 # Ensure project root is on path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.preprocess import FEATURES, TARGET
-
 
 # ---------------------------------------------------------------------------
 # Dataset fixtures

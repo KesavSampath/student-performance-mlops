@@ -11,9 +11,9 @@ All predictions are obtained by calling the FastAPI backend via HTTP.
 """
 
 import os
-import time
 from datetime import datetime
 
+import pandas as pd
 import requests
 import streamlit as st
 
@@ -297,6 +297,5 @@ if submitted:
             # Input summary table
             st.markdown("---")
             st.markdown("### 📌 Input Summary")
-            import pandas as pd
             input_df = pd.DataFrame([features]).T.rename(columns={0: "Value"})
             st.dataframe(input_df, use_container_width=True)

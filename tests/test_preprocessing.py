@@ -17,7 +17,6 @@ from sklearn.pipeline import Pipeline
 
 from src.preprocess import (
     FEATURES,
-    TARGET,
     TEST_SIZE,
     RANDOM_SEED,
     build_pipeline,

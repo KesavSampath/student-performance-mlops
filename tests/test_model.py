@@ -15,7 +15,6 @@ import os
 import sys
 
 import numpy as np
-import pandas as pd
 import pytest
 
 from src.evaluate import compute_metrics, quality_gate, MIN_R2, MAX_MAE

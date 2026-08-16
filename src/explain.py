@@ -28,7 +28,7 @@ import joblib
 import shap
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.preprocess import FEATURES, TARGET, load_preprocessor, split_data
+from src.preprocess import FEATURES, load_preprocessor, split_data
 from src.data_validation import validate_dataset
 
 DATA_PATH = os.path.join("data", "raw", "students.csv")
@@ -77,7 +77,7 @@ def compute_shap(
 
 def plot_shap_summary(shap_values, X_sample, feature_names, save_path: str) -> None:
     """Beeswarm summary plot."""
-    fig = plt.figure(figsize=(9, 5))
+    plt.figure(figsize=(9, 5))
     shap.summary_plot(
         shap_values,
         X_sample,
@@ -122,7 +122,6 @@ def run_explanation():
     df = pd.read_csv(DATA_PATH)
     df = validate_dataset(df)
 
-    from src.preprocess import split_data
     _, X_test, _, _ = split_data(df)
     X_test_t = preprocessor.transform(X_test)
 
