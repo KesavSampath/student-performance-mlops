@@ -32,7 +32,7 @@ import logging
 # ── Path setup (supports running from repo root) ──────────────────────────
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.predict import predict_score, get_metadata, _load_artifacts
+from src.predict import predict_score, get_metadata, load_artifacts
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
     """Startup: load model and preprocessor into memory."""
     logger.info("Loading model artifacts at startup ...")
     try:
-        _load_artifacts()
+        load_artifacts()
         logger.info("Model loaded successfully.")
     except FileNotFoundError as e:
         logger.error(f"Could not load model: {e}")
@@ -194,7 +194,7 @@ async def predict(request: PredictRequest):
 @app.get("/metrics", tags=["Monitoring"])
 async def metrics():
     """Expose Prometheus metrics."""
-    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 # ---------------------------------------------------------------------------

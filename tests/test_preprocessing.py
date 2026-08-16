@@ -18,7 +18,6 @@ from sklearn.pipeline import Pipeline
 from src.preprocess import (
     FEATURES,
     TEST_SIZE,
-    RANDOM_SEED,
     build_pipeline,
     split_data,
 )

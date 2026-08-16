@@ -11,14 +11,16 @@ Covers:
   - Quality gate logic
 """
 
+import json
 import os
 import sys
 
+import joblib
 import numpy as np
 import pytest
 
 from src.evaluate import compute_metrics, quality_gate, MIN_R2, MAX_MAE
-from src.predict import categorise
+from src.predict import categorise, predict_score
 
 # ---------------------------------------------------------------------------
 # Quality gate tests (pure logic — no model file needed)
@@ -112,33 +114,27 @@ MODEL_EXISTS = os.path.exists(os.path.join("models", "best_model.joblib"))
 @pytest.mark.skipif(not MODEL_EXISTS, reason="Model not trained yet — run train.py first")
 class TestModelArtifact:
     def test_model_loads(self):
-        import joblib
         model = joblib.load(os.path.join("models", "best_model.joblib"))
         assert model is not None
 
     def test_prediction_is_numeric(self, sample_features):
-        from src.predict import predict_score
         result = predict_score(sample_features)
         assert isinstance(result["predicted_score"], (int, float))
 
     def test_prediction_in_valid_range(self, sample_features):
-        from src.predict import predict_score
         result = predict_score(sample_features)
         assert 0 <= result["predicted_score"] <= 100
 
     def test_prediction_returns_performance(self, sample_features):
-        from src.predict import predict_score
         result = predict_score(sample_features)
         assert result["performance"] in {"POOR", "AVERAGE", "GOOD", "VERY GOOD", "EXCELLENT"}
 
     def test_invalid_input_raises_error(self):
-        from src.predict import predict_score
         with pytest.raises((ValueError, KeyError, Exception)):
             predict_score({"study_hours": 5.0})  # missing 5 features
 
     def test_multiple_predictions_consistent(self, sample_features):
         """Same input should give same output (deterministic model)."""
-        from src.predict import predict_score
         r1 = predict_score(sample_features)
         r2 = predict_score(sample_features)
         assert r1["predicted_score"] == r2["predicted_score"]
@@ -147,17 +143,15 @@ class TestModelArtifact:
         assert os.path.exists(os.path.join("models", "model_metadata.json"))
 
     def test_metadata_has_required_keys(self):
-        import json
         with open(os.path.join("models", "model_metadata.json")) as f:
             meta = json.load(f)
         for key in ("model_name", "model_version", "metrics", "features"):
             assert key in meta
 
     def test_model_metrics_pass_quality_gate(self):
-        import json
         with open(os.path.join("models", "model_metadata.json")) as f:
             meta = json.load(f)
         metrics = meta["metrics"]
         assert quality_gate(metrics, raise_on_fail=False), (
-            f"Saved model fails quality gate: R²={metrics['r2']}, MAE={metrics['mae']}"
+            f"Saved model fails quality gate: R2={metrics['r2']}, MAE={metrics['mae']}"
         )

@@ -75,7 +75,7 @@ _preprocessor = None
 _metadata = None
 
 
-def _load_artifacts():
+def load_artifacts():
     """Load model and preprocessor into module-level singletons."""
     global _model, _preprocessor, _metadata
 
@@ -94,6 +94,10 @@ def _load_artifacts():
             _metadata = json.load(f)
 
     return _model, _preprocessor, _metadata
+
+
+# Alias for backward compatibility
+_load_artifacts = load_artifacts
 
 
 # ---------------------------------------------------------------------------

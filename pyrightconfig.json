@@ -1,0 +1,17 @@
+{
+  "include": [
+    "src",
+    "api",
+    "app",
+    "tests",
+    "notebooks"
+  ],
+  "extraPaths": [
+    ".",
+    "src"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Windows"
+}
