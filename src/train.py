@@ -225,7 +225,7 @@ def train(data_path: str = DATA_PATH) -> dict:
                 mlflow.log_artifact(feat_plot, artifact_path="plots")
 
             # Log model
-            mlflow.sklearn.log_model(model, artifact_path="model")
+            mlflow.sklearn.log_model(model, artifact_path="model", serialization_format="cloudpickle")
 
             run_id = mlflow.active_run().info.run_id
             results[model_name] = {
