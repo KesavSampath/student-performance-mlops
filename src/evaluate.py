@@ -42,7 +42,7 @@ def compute_metrics(y_true, y_pred) -> Dict[str, float]:
     mae = mean_absolute_error(y_true, y_pred)
     rmse = math.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
-    return {"mae": round(mae, 4), "rmse": round(rmse, 4), "r2": round(r2, 4)}
+    return {"mae": float(round(mae, 4)), "rmse": float(round(rmse, 4)), "r2": float(round(r2, 4))}
 
 
 # ---------------------------------------------------------------------------
